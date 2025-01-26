@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 # import cv2
-import imutils
+import image_utils
 
 
 def img_loader(path):
@@ -30,15 +30,15 @@ class MultimodalDamageAssessmentDatset(Dataset):
 
     def __transforms(self, aug, pre_img, post_img, label):
         if aug:
-            pre_img, post_img, label = imutils.random_crop(pre_img, post_img, label, self.crop_size)
-            pre_img, post_img, label = imutils.random_fliplr(pre_img, post_img, label)
-            pre_img, post_img, label = imutils.random_flipud(pre_img, post_img, label)
-            pre_img, post_img, label = imutils.random_rot(pre_img, post_img, label)
+            pre_img, post_img, label = image_utils.random_crop(pre_img, post_img, label, self.crop_size)
+            pre_img, post_img, label = image_utils.random_fliplr(pre_img, post_img, label)
+            pre_img, post_img, label = image_utils.random_flipud(pre_img, post_img, label)
+            pre_img, post_img, label = image_utils.random_rot(pre_img, post_img, label)
 
-        pre_img = imutils.normalize_img(pre_img)  # imagenet normalization
+        pre_img = image_utils.normalize_img(pre_img)  # imagenet normalization
         pre_img = np.transpose(pre_img, (2, 0, 1))
 
-        post_img = imutils.normalize_img(post_img)  # imagenet normalization
+        post_img = image_utils.normalize_img(post_img)  # imagenet normalization
         post_img = np.transpose(post_img, (2, 0, 1))
 
         return pre_img, post_img, label
@@ -79,10 +79,10 @@ class MultimodalDamageAssessmentDatset_Inference(Dataset):
         self.suffix = suffix
 
     def __transforms(self, pre_img, post_img):
-        pre_img = imutils.normalize_img(pre_img)  # imagenet normalization
+        pre_img = image_utils.normalize_img(pre_img)  # imagenet normalization
         pre_img = np.transpose(pre_img, (2, 0, 1))
 
-        post_img = imutils.normalize_img(post_img)  # imagenet normalization
+        post_img = image_utils.normalize_img(post_img)  # imagenet normalization
         post_img = np.transpose(post_img, (2, 0, 1))
 
         return pre_img, post_img
