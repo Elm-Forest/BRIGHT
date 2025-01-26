@@ -1,14 +1,11 @@
-import argparse
 import os
 
 import imageio
 import numpy as np
 from torch.utils.data import Dataset
+
 # import cv2
-import imutils as imutils
-import matplotlib.pyplot as plt
-from torch.utils import data
-from PIL import Image
+import imutils
 
 
 def img_loader(path):
