@@ -1,6 +1,6 @@
 import sys
 
-from dfc25_benchmark.model.model import creatModel
+from model.model_factory import creatModel
 
 sys.path.append('/home/chenhrx/project/BRIGHT/dfc25_benchmark')  # change this to the path of your project
 
