@@ -5,7 +5,7 @@ import imageio
 import numpy as np
 from torch.utils.data import Dataset
 # import cv2 
-import dataset.imutils as imutils
+import dfc25_benchmark.dataset.imutils as imutils
 import matplotlib.pyplot as plt
 from torch.utils import data
 from PIL import Image
