@@ -7,11 +7,11 @@ import numpy as np
 from tqdm import tqdm
 from collections import defaultdict
 from torch.utils.data import DataLoader
-from dfc25_benchmark.dataset.make_data_loader import MultimodalDamageAssessmentDatset_Inference
+from dataset.make_data_loader import MultimodalDamageAssessmentDatset_Inference
 
 from PIL import Image
-from dfc25_benchmark.model.UNet import UNet
-from dfc25_benchmark.model.SiamCRNN import SiamCRNN
+from model.UNet import UNet
+from model.SiamCRNN import SiamCRNN
 
 import argparse
 from datetime import datetime

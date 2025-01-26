@@ -1,6 +1,6 @@
 import sys
 
-from dfc25_benchmark.dataset.make_data_loader import MultimodalDamageAssessmentDatset
+from dataset.make_data_loader import MultimodalDamageAssessmentDatset
 
 sys.path.append('/home/chenhrx/project/BRIGHT/dfc25_benchmark') # change this to the path of your project
 
@@ -16,13 +16,13 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dfc25_benchmark.dataset.make_data_loader import MultimodalDamageAssessmentDatset
-from dfc25_benchmark.model.UNet import UNet
-from dfc25_benchmark.model.SiamCRNN import SiamCRNN
+from dataset.make_data_loader import MultimodalDamageAssessmentDatset
+from model.UNet import UNet
+from model.SiamCRNN import SiamCRNN
 from datetime import datetime
 
-from dfc25_benchmark.util_func.metrics import Evaluator
-import dfc25_benchmark.util_func.lovasz_loss as L
+from util_func.metrics import Evaluator
+import util_func.lovasz_loss as L
 
 
 class Trainer(object):
