@@ -5,13 +5,11 @@ import os
 import torch
 import numpy as np
 from tqdm import tqdm
-from collections import defaultdict
 from torch.utils.data import DataLoader
-from dataset.make_data_loader import MultimodalDamageAssessmentDatset_Inference
+from make_data_loader import MultimodalDamageAssessmentDatset_Inference
 
 from PIL import Image
 from model.UNet import UNet
-from model.SiamCRNN import SiamCRNN
 
 import argparse
 from datetime import datetime

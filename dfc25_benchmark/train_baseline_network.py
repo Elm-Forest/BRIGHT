@@ -1,12 +1,9 @@
 import sys
 
-from dataset.make_data_loader import MultimodalDamageAssessmentDatset
-
 sys.path.append('/home/chenhrx/project/BRIGHT/dfc25_benchmark') # change this to the path of your project
 
 import argparse
 import os
-import time
 
 import numpy as np
 
@@ -16,9 +13,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dataset.make_data_loader import MultimodalDamageAssessmentDatset
+from make_data_loader import MultimodalDamageAssessmentDatset
 from model.UNet import UNet
-from model.SiamCRNN import SiamCRNN
 from datetime import datetime
 
 from util_func.metrics import Evaluator

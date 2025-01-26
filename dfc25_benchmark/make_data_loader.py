@@ -4,8 +4,10 @@ import imageio
 import numpy as np
 from torch.utils.data import Dataset
 
+from dataset import image_utils
+
+
 # import cv2
-import image_utils
 
 
 def img_loader(path):
