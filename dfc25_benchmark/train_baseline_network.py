@@ -143,7 +143,7 @@ class Trainer(object):
             if (itera + 1) % self.args.print_iters == 0:
                 print()
                 print(
-                    f'iter is {itera + 1}, classification loss is {final_loss.item()},learning loss is {self.optim.param_groups[0]['lr']}')
+                    f"iter is {itera + 1}, classification loss is {final_loss.item()},learning loss is {self.optim.param_groups[0]['lr']}")
                 if (itera + 1) % 500 == 0:
                     self.deep_model.eval()
                     val_mIoU, final_OA, IoU_of_each_class = self.validation()
