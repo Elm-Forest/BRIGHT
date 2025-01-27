@@ -85,11 +85,15 @@ class Trainer(object):
                 [dict(params=self.deep_model.module.parameters(), lr=args.learning_rate)]
             )
 
+        # 使用 CosineAnnealingLR 学习率调度器
+        self.scheduler = None
+
     def training(self):
         """
         Main training loop that iterates over the training dataset for several steps (max_iters).
         Prints intermediate losses and evaluates on holdout dataset periodically.
         """
+
         best_mIoU = 0.0
         best_round = []
         torch.cuda.empty_cache()
@@ -100,13 +104,16 @@ class Trainer(object):
                                        num_workers=self.args.num_workers, drop_last=False)
         elem_num = len(train_data_loader)
         train_enumerator = enumerate(train_data_loader)
+
+        unit = elem_num // 5
+        self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optim, T_max=unit, eta_min=1e-6)
         for _ in tqdm(range(elem_num)):
             itera, data = train_enumerator.__next__()
             pre_change_imgs, post_change_imgs, labels_loc, labels_clf, _ = data
 
             pre_change_imgs = pre_change_imgs.cuda()
             post_change_imgs = post_change_imgs.cuda()
-            labels_loc = labels_loc.cuda().long()
+            # labels_loc = labels_loc.cuda().long()
             labels_clf = labels_clf.cuda().long()
 
             valid_labels_clf = (labels_clf != 255).any()
@@ -131,10 +138,12 @@ class Trainer(object):
             final_loss.backward()
 
             self.optim.step()
+            self.scheduler.step()
 
-            if (itera + 1) % 10 == 0:
+            if (itera + 1) % self.args.print_iters == 0:
                 print()
-                print(f'iter is {itera + 1}, classification loss is {final_loss.item()}')
+                print(
+                    f'iter is {itera + 1}, classification loss is {final_loss.item()},learning loss is {self.optim.param_groups[0]['lr']}')
                 if (itera + 1) % 500 == 0:
                     self.deep_model.eval()
                     val_mIoU, final_OA, IoU_of_each_class = self.validation()
@@ -205,6 +214,7 @@ def main():
     parser.add_argument('--start_iter', type=int, default=0)
     parser.add_argument('--cuda', type=bool, default=True)
     parser.add_argument('--max_iters', type=int, default=240000)
+    parser.add_argument('--print_iters', type=int, default=50)
     parser.add_argument('--model_type', type=str)
     parser.add_argument('--model_param_path', type=str,
                         default='/home/songjian/project/BRIGHT/dfc25_benchmark/saved_weights')
