@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('--val_dataset_path', type=str, default='K:/dataset/dfc25track2/dfc25_track2_trainval/val')
     parser.add_argument('--val_data_list_path', type=str, default='dataset/splitname/val_setlevel.txt')
     parser.add_argument('--val_data_name_list', type=list)
-    parser.add_argument('--existing_weight_path', type=str, default='pretained/best_model.pth')
+    parser.add_argument('--existing_weight_path', type=str, default='pretained/uper_mitb4_060.pth')
     parser.add_argument('--inferece_saved_path', type=str, default='results')
 
     args = parser.parse_args()

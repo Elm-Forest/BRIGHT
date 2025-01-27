@@ -45,8 +45,6 @@ class Trainer(object):
         self.deep_model = creatModel(args, in_channels=6, out_channels=4)
         # self.deep_model = SiamCRNN()
 
-        self.deep_model = self.deep_model.cuda()
-
         # Create a directory to save model weights, organized by timestamp.
         now_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.model_save_path = os.path.join(args.model_param_path, args.dataset, args.model_type + '_' + now_str)
@@ -57,18 +55,35 @@ class Trainer(object):
         if args.resume is not None:
             if not os.path.isfile(args.resume):
                 raise RuntimeError("=> no checkpoint found at '{}'".format(args.resume))
-            checkpoint = torch.load(args.resume)
-            model_dict = {}
-            state_dict = self.deep_model.state_dict()
-            for k, v in checkpoint.items():
-                if k in state_dict:
-                    model_dict[k] = v
-            state_dict.update(model_dict)
-            self.deep_model.load_state_dict(state_dict)
-
+            print("Loading weights...")
+            checkpoint = torch.load(args.resume, map_location=torch.device('cpu'))
+            try:
+                model_dict = {}
+                state_dict = self.deep_model.state_dict()
+                for k, v in checkpoint.items():
+                    if k in state_dict:
+                        model_dict[k] = v
+                state_dict.update(model_dict)
+                self.deep_model.load_state_dict(state_dict)
+                print('Pretrained Loading success!')
+            except:
+                new_state_dict = {k.replace('module.', ''): v for k, v in checkpoint.items()}
+                try:
+                    self.deep_model.load_state_dict(new_state_dict, strict=False)
+                    print('loading success after replace module')
+                except Exception as inst:
+                    print('pass loading weights')
+                    print(inst)
         self.optim = optim.AdamW(self.deep_model.parameters(),
                                  lr=args.learning_rate,
                                  weight_decay=args.weight_decay)
+        self.deep_model = self.deep_model.cuda()
+        if torch.cuda.device_count() > 1:
+            print("Number of GPUs :", torch.cuda.device_count())
+            self.deep_model = torch.nn.DataParallel(self.deep_model)
+            self.optim = torch.optim.Adam(
+                [dict(params=self.deep_model.module.parameters(), lr=args.learning_rate)]
+            )
 
     def training(self):
         """
@@ -118,6 +133,7 @@ class Trainer(object):
             self.optim.step()
 
             if (itera + 1) % 10 == 0:
+                print()
                 print(f'iter is {itera + 1}, classification loss is {final_loss.item()}')
                 if (itera + 1) % 500 == 0:
                     self.deep_model.eval()
