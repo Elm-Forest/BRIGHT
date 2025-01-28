@@ -3,7 +3,7 @@ import sys
 from model.model_factory import creatModel
 
 sys.path.append('/home/chenhrx/project/BRIGHT/dfc25_benchmark')  # change this to the path of your project
-
+import ttach as tta
 import os
 import torch
 import numpy as np
@@ -31,7 +31,6 @@ class Inference:
         self.model = creatModel(args, in_channels=6, out_channels=4)
         # self.model = SiamCRNN()
 
-        self.model = self.model.cuda()
         self.model.eval()
         self.color_map = {
             0: (255, 255, 255),  # No damage - white
@@ -49,15 +48,38 @@ class Inference:
         if args.existing_weight_path is not None:
             if not os.path.isfile(args.existing_weight_path):
                 raise RuntimeError("=> no checkpoint found at '{}'".format(args.existing_weight_path))
-            checkpoint = torch.load(args.existing_weight_path)
-            model_dict = {}
-            state_dict = self.model.state_dict()
-            for k, v in checkpoint.items():
-                if k in state_dict:
-                    model_dict[k] = v
-            state_dict.update(model_dict)
-            self.model.load_state_dict(state_dict)
+            print("Loading weights...")
+            checkpoint = torch.load(args.existing_weight_path, map_location=torch.device('cpu'))
+            try:
+                self.model.load_state_dict(checkpoint, strict=True)
+                print('Pretrained Loading success!')
+            except:
+                new_state_dict = {k.replace('module.', ''): v for k, v in checkpoint.items()}
+                try:
+                    self.model.load_state_dict(new_state_dict, strict=False)
+                    model_dict = {}
+                    state_dict = self.model.state_dict()
+                    for k, v in checkpoint.items():
+                        if k in state_dict:
+                            model_dict[k] = v
+                    state_dict.update(model_dict)
+                    self.model.load_state_dict(state_dict)
+                    print('loading success after replace module')
+                except Exception as inst:
+                    print('pass loading weights')
+                    print(inst)
             print('Loaded existing weights from {}'.format(args.existing_weight_path))
+        transforms = tta.Compose(
+            [
+                tta.HorizontalFlip(),
+                tta.VerticalFlip(),
+                tta.Rotate90(angles=[0, 90, 180, 270]),
+                # tta.Scale(scales=[0.8, 1, 1.2]),
+                # tta.Multiply(factors=[0.9, 1, 1.1]),
+            ]
+        )
+        self.model = tta.SegmentationTTAWrapper(self.model, transforms, merge_mode='mean')
+        self.model = self.model.cuda().eval()
 
     def run_inference(self):
         print('Starting inference...')
@@ -95,10 +117,12 @@ class Inference:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Inference on BRIGHT dataset")
 
+    parser.add_argument('--model_name', default="uper")
+    parser.add_argument('--encoder_name', default="mit_b4")
     parser.add_argument('--val_dataset_path', type=str, default='K:/dataset/dfc25track2/dfc25_track2_trainval/val')
     parser.add_argument('--val_data_list_path', type=str, default='dataset/splitname/val_setlevel.txt')
     parser.add_argument('--val_data_name_list', type=list)
-    parser.add_argument('--existing_weight_path', type=str, default='pretained/uper_mitb4_060.pth')
+    parser.add_argument('--existing_weight_path', type=str, default='pretained/uper_mitb4_66.pth')
     parser.add_argument('--inferece_saved_path', type=str, default='results')
 
     args = parser.parse_args()

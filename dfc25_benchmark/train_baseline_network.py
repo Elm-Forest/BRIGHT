@@ -58,18 +58,19 @@ class Trainer(object):
             print("Loading weights...")
             checkpoint = torch.load(args.resume, map_location=torch.device('cpu'))
             try:
-                model_dict = {}
-                state_dict = self.deep_model.state_dict()
-                for k, v in checkpoint.items():
-                    if k in state_dict:
-                        model_dict[k] = v
-                state_dict.update(model_dict)
-                self.deep_model.load_state_dict(state_dict)
+                self.deep_model.load_state_dict(checkpoint, strict=False)
                 print('Pretrained Loading success!')
             except:
                 new_state_dict = {k.replace('module.', ''): v for k, v in checkpoint.items()}
                 try:
                     self.deep_model.load_state_dict(new_state_dict, strict=False)
+                    model_dict = {}
+                    state_dict = self.deep_model.state_dict()
+                    for k, v in checkpoint.items():
+                        if k in state_dict:
+                            model_dict[k] = v
+                    state_dict.update(model_dict)
+                    self.deep_model.load_state_dict(state_dict)
                     print('loading success after replace module')
                 except Exception as inst:
                     print('pass loading weights')
@@ -197,7 +198,8 @@ class Trainer(object):
 
 def main():
     parser = argparse.ArgumentParser(description="Training on BRIGHT dataset")
-
+    parser.add_argument('--model_name', default="uper")
+    parser.add_argument('--encoder_name', default="mit_b4")
     parser.add_argument('--dataset', type=str, default='BRIGHT')
     parser.add_argument('--train_dataset_path', type=str)
     parser.add_argument('--train_data_list_path', type=str)

@@ -7,7 +7,9 @@ def creatModel(args=None,
                activation=None,
                encoder_weights="imagenet",
                encoder_name='mit_b4'):
-    model = smp.DeepLabV3Plus(
+    if args.encoder_name is not None:
+        encoder_name = args.encoder_name
+    model = smp.UPerNet(
         classes=out_channels,
         in_channels=in_channels,
         activation=activation,
